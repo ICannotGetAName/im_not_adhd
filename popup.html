@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Bionic Reading</title>
+    <style>
+        body {
+            width: 250px;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mode-btn.active {
+            background-color: #2196F3;
+            color: white;
+        }
+        .bold-levels {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        .bold-level {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .bold-level:hover {
+            background-color: #f5f5f5;
+        }
+        .bold-level.active {
+            background-color: #e3f2fd;
+        }
+        .bold-level input[type="radio"] {
+            margin: 0;
+        }
+        .level-description {
+            font-size: 12px;
+            color: #666;
+            margin-left: 20px;
+        }
+        .selection-tip {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            display: none;
+        }
+        .selection-tip.show {
+            display: block;
+        }
+        .list-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        .list-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .whitelist-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .blacklist-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .list-btn:hover {
+            opacity: 0.9;
+        }
+        .list-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .list-status {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="switch-container">
+            <span>Bionic Reading</span>
+            <label class="switch">
+                <input type="checkbox" id="toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="full">全页处理</button>
+            <button class="mode-btn" data-mode="selection">区域加粗</button>
+        </div>
+        
+        <div class="selection-tip" id="selectionTip">
+            提示：选中网页中的文字，然后点击处理按钮进行区域加粗
+        </div>
+        
+        <div class="bold-levels">
+            <div class="bold-level" data-level="Glance">
+                <input type="radio" name="boldLevel" value="Glance">
+                <div>
+                    <div>Glance</div>
+                    <div class="level-description">轻度加粗 (20-30%)</div>
+                </div>
+            </div>
+            
+            <div class="bold-level" data-level="Focus">
+                <input type="radio" name="boldLevel" value="Focus">
+                <div>
+                    <div>Focus</div>
+                    <div class="level-description">标准加粗 (40-50%)</div>
+                </div>
+            </div>
+            
+            <div class="bold-level" data-level="Deep">
+                <input type="radio" name="boldLevel" value="Deep">
+                <div>
+                    <div>Deep</div>
+                    <div class="level-description">强烈加粗 (60-70%)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="list-controls">
+            <button class="list-btn whitelist-btn" id="whitelistBtn">
+                <span>添加到白名单</span>
+            </button>
+            <button class="list-btn blacklist-btn" id="blacklistBtn">
+                <span>添加到黑名单</span>
+            </button>
+        </div>
+        <div class="list-controls" style="margin-top: 5px;">
+            <button class="list-btn remove-btn" id="removeFromListBtn" style="background-color: #757575; color: white; display: none;">
+                <span>从列表中移除</span>
+            </button>
+        </div>
+        <div class="list-status" id="listStatus"></div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html> 
